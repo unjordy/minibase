@@ -1,0 +1,12 @@
+out/
+.plateconfig
+__pycache__
+
+*~
+,*
+.*.swp
+.*.swo
+.idea/
+result
+result-*
+.DS_Store
