@@ -1,112 +1,57 @@
-# scad-build
+# minibase
 
-This is a multi-STL [OpenSCAD](https://openscad.org/) build system based around
-GNU `make`. It supports dynamic build targets, intelligent previews with
-user-defined part layouts, and autoplating to efficiently send the maximum
-number of objects that will fit your 3D printer build plate to your slicer,
-reducing the amount of work that goes into printing complex projects.
+This is an [OpenSCAD](https://openscad.org/) library for describing custom
+parametric miniature bases in a simple domain-specific language that allows fast
+customization. It also comes with a standard set of base definitons for
+OnePageRules (which should work for Warhammer and 40k as well) and Battletech,
+and a square base suitable for a number of tabletop games and RPGs.
 
 ## Requirements
 
-- OpenSCAD 2021.01 or newer
-- GNU `make`
-- Python 3.9.x or newer and the command line version of `prusa-slicer` (only for autoplating)
+See the [requirements for
+scad-build](https://github.com/unjordy/scad-build#requirements). 
 
-## Using scad-build
+## Building STLs
 
-This repository is intended to be a template to base new projects off of;
-existing projects without a build system can be adapted to use `scad-build`
-too. The files in this repository expect to be copied into the root of your
-OpenSCAD project.
+This project uses [scad-build](https://github.com/unjordy/scad-build) to build
+all of the defined bases all at once. Typing `make` should produce STLs in `out`
+if you're on Linux or a Unix-like system and have all of `scad-build`'s
+prerequisites.
 
-### Importing
+If you'd like to render bases to STL individually without `scad-build`, just
+open the base definition in OpenSCAD as you normally would and render it from
+there.
 
-Once you have installed `scad-build` into the root of your project, import it
-into any SCAD file you want to export multiple STLs from with
-`import <./build.scad>`. Modify the path if `build.scad` is not in the same
-directory as your SCAD file.
+## Defining new bases
 
-### Using `build(id)`
-
-`build()` is a module that designates its children as a separate build unit;
-this will cause `make` to output an STL at `out/scad_file/build_id.stl`
-containing only the children in scope for the `build(build_id)` module in the 
-file `scad_file.scad`. `build` modules exist at runtime, so they can be nested
-under other modules if desired, or generated dynamically. Note that for
-`scad-build` to work properly, everything that renders during a build should be
-scoped under a `build()` module. See the section on previewing below for
-information on how to render multiple items while designing.
-
-While `scad-build` is running under `make`, the function `building()` will
-return `true`, and `building(build_id)` will return true if the current build
-unit for the `openscad` process has been called to handle `build(build_id)`.
-
-Children of `build()` can access the current build ID via the `$build_id`
-variable. If there is no `build()` parent, `$build_id` is the empty string.
-
-`scad-build` only pays attention to the first `build()` module in a render tree;
-any instances of `build()` inside of `build()` will not be picked up by the
-build system.
-
-### Previewing
-
-`scad-build` has three distinctive modes for the OpenSCAD runtime. The first
-is `build()` module discovery, which is an implementation detail. The second is
-build mode, where `make` calls `openscad` with a single `build_id` selected. The
-third mode is preview mode, the default mode when `scad-build` projects are
-accessed outside of `make` -- most relevantly, in OpenSCAD's UI for preview.
-
-While previewing, the function `previewing()` returns `true`. This can be used
-to define modules that will render all of your STLs in the same view while you
-are designing them without interfering with building. See the `preview_row()`
-and `preview_column()` modules in `build.scad` for ready-to-go preview layout
-utilites that demonstrate how to use `previewing()` to generate your own layout.
-
-Note that preview modules disable layouts and call `children()` when not
-previewing, because they expect to only render children wrapped in `build()`,
-and only the child matching the `build_id` will be rendered when not previewing.
-
-### Building (rendering)
-
-Type `make` to start a build. Your STLs will end up in the `out` directory, in
-subdirectories named after the SCAD file used to build the STL. Each STL is
-named after the argument to its parent `build()` module.
-
-### Multi-process rendering
-
-`scad-build` supports the standard `make` mechanism for multi-process/multi-core
-builds: specify `-j#` as an argument to `make`, where `#` is the number of
-processes (build units) you want to render simultaneously.
-
-## Autoplating
-
-Ideal for complex 3D printing projects with many discrete parts, autoplating
-tries to pack the maximum number of STL files into your build volume. It
-requires Python 3.9.x and the command line version of `prusa-slicer` to be
-accessible.
-
-### Configuring
-
-Autoplating requires you to create a `.plateconfig` file in your project root;
-this file should be added to your `.gitignore`, since it is specific to your
-3D printer. Its contents should look like:
-
+`minibase` defines a domain-specific language just for describing a miniature
+base. Each base is defined in a separate scad file in the `minibase` root
+directory, though if you're using `scad-build` you can define more than one base
+per file. The base declaration in each scad file looks like:
 ```
-[plate]
-size_x = <the x size (width) of your build volume in mm>
-size_y = <the y size (height) of your build volume in mm>
-spacing = <optional: the amount of space to leave between objects (default: 8mm)>
+include <./minibase.scad>
+
+inclined() diameter(32) base("32mm-opr-infantry");
 ```
+Each base starts with a set of descriptive calls that describe the parameters
+for the base you want, followed by a call to `base(id)` that combines your
+parameters with `minibase`'s defaults and renders the base. The `id` argument is
+used by `scad-build` to name the STL for that base.
 
-### Running the autoplater
+Note that each descriptive call is scoped so that it only applies to its
+children, so multiple calls to `base()` won't interfere with each other as long
+as they're separated by semicolons.
 
-Type `make autoplate`. If you have written a `.plateconfig` and have all of the
-necessary dependencies, this should build your STL files if necessary, then
-populate `out/autoplate` with subdirectories representing each prepared build
-plate. Each subdirectory contains the STLs on that plate (more specifically, 
-symbolic links to already built STLs to save space).
+The functions provided by `minibase` are:
+| name          | description                                                                       |
+|---------------|-----------------------------------------------------------------------------------|
+| `tapered(r)`  | A fancy tapered base rim; argument is the ratio of the rim to the top of the base |
+| `inclined()`  | A normal slanted base rim                                                         |
+| `flat()`      | A flat base rim                                                                   |
+| `shape(s)`    | The base has `s` sides; 6 is a hex, 4 is a square, 100 is a circle                |
+| `diameter(d)` | The base's diameter is `d` millimeters                                            |
+| `height(h)`   | The base is `h` millimeters high                                                  |
+| `slant(s)`    | Slant the rim of the base `s`%, if tapered or inclined                            |
+| `stretch(s)`  | Stretch one side of the base by `s`% of its diameter                              |
+| `base(id)`    | Render a base with build ID `id`                                                  |
 
-To slice a whole plate based off of the autoplater's suggestion, call your
-slicer like: `prusa-slicer out/autoplater/plate0/*.stl`, changing this
-command as needed if slicing other plate numbers or using Cura or another
-slicer.
