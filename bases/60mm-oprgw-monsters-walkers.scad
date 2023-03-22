@@ -1,3 +1,3 @@
 include <../minibase.scad>
 
-inclined() diameter(60) base("60mm-opr-monsters-walkers");
+inclined() diameter(60) base("60mm-oprgw-monsters-walkers");

@@ -1,3 +1,3 @@
 include <../minibase.scad>
 
-inclined() diameter(40) base("40mm-opr-infantry-large");
+inclined() diameter(40) base("40mm-oprgw-infantry-large");
