@@ -1,0 +1,26 @@
+name: Render & Package
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  render-and-package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Nix
+        uses: cachix/install-nix-action@v19
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          install_url: https://releases.nixos.org/nix/nix-2.9.2/install
+      - name: Render
+        run: nix run .#ci
+      - name: Package
+        uses: softprops/action-gh-release@v1
+        with:
+          files: minibase.zip
