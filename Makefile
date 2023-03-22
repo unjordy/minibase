@@ -6,7 +6,7 @@ all: ${TARGETS}
 
 .SECONDEXPANSION:
 out/%.stl: build=$(subst key-,,$(subst .stl,,$(@F)))
-out/%.stl: $$(*D).scad
+out/%.stl: bases/$$(*D).scad
 	@mkdir -p out/$(*D)
 	@mkdir -p out/.cache/$(*D)
 	openscad $(OPENSCADFLAGS) -m make -D build='"$(build)"' -o '$@' -d 'out/.cache/$(*D)/$(@F).deps' '$<'

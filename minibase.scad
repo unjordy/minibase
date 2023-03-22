@@ -9,13 +9,13 @@ $base_shape = 100; //	[30:Low-res Circle, 100: Hi-res Circle, 5:Pentagon, 6:Hexa
 
 $base_diameter = 32;
 $base_height = 4;
-$base_slant = 95; // [50:100]
+$base_slant = 95;
 
 // Percentage:
 $base_stretch = 100;
 
-//('Cool' base only)
-$base_inner_circle_ratio = 40; // [10:80]
+//(tapered base only)
+$base_inner_circle_ratio = 40;
 
 module tapered(r=40) {
   $base_rim = 1;
