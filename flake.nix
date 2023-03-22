@@ -21,7 +21,7 @@
         mkdir -p archive
         cp -r ${minibase}/* archive
         chmod -R 755 archive
-        zip -r -j minibase archive
+        ${pkgs.zip}/bin/zip -r -j minibase archive
         rm -r archive
       '';
       default = minibase;
