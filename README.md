@@ -1,28 +1,43 @@
 # minibase
 
-This is an [OpenSCAD](https://openscad.org/) library for describing custom
-parametric miniature bases in a simple domain-specific language that allows fast
-customization. It also comes with a standard set of base definitons for
-OnePageRules (which should work for Warhammer and 40k as well) and Battletech,
-and a square base suitable for a number of tabletop games and RPGs.
+This is a repository of 3D printable miniature base STLs for board games, RPGs,
+and tabletop wargames like [OnePageRules](https://www.onepagerules.com/),
+Battletech, and 40k. Zip files with the bases we've designed so far are
+available on the [releases page](https://github.com/unjordy/minibase/releases),
+and it's our ambition to have a collection of every type of base. Contributions
+are welcome!
 
-## Requirements
+Towards that end, it's also an [OpenSCAD](https://openscad.org/) library for
+describing custom parametric miniature bases in a simple domain-specific
+language that allows fast customization.
 
-See the [requirements for
-scad-build](https://github.com/unjordy/scad-build#requirements). 
+## Base naming
+
+Generally, base filenames will start with their diameter. They'll also contain a
+game system the base is most associated with:
+| system  | description                                       |
+|---------|---------------------------------------------------|
+| `oprgw` | OnePageRules or Games Workshop                    |
+| `gw`    | Games Workshop only                               |
+| `bt`    | Battletech                                        |
+| `gen`   | Generic (not strongly associated with any system) |
+
+Base definitions live in the `bases` directory in this repository, and the STL
+files in the zip release will be named after the argument to `build()` in each
+definition.
 
 ## Building STLs
 
 This project uses [scad-build](https://github.com/unjordy/scad-build) to build
 all of the defined bases all at once. Typing `make` should produce STLs in `out`
-if you're on Linux or a Unix-like system and have all of `scad-build`'s
-prerequisites.
+if you're on Linux or a Unix-like system and have all of [scad-build's
+prerequisites](https://github.com/unjordy/scad-build#requirements).
 
 If you'd like to render bases to STL individually without `scad-build`, just
 open the base definition in OpenSCAD as you normally would and render it from
 there.
 
-## Defining new bases
+## Describing new bases
 
 `minibase` defines a domain-specific language just for describing a miniature
 base. Each base is defined in a separate scad file in the `minibase` root

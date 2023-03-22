@@ -1,5 +1,5 @@
 {
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs }:
   let
     supportedSystems = [
       "x86_64-linux"
