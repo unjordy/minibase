@@ -13,14 +13,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Configure /nix/store cache
+        uses: actions/cache@v3.3.1
+        id: nix-cache
+        with:
+          path: /tmp/nix-store
+          key: ${{ runner.os }}-nix-store
       - name: Setup Nix
         uses: cachix/install-nix-action@v19
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
           install_url: https://releases.nixos.org/nix/nix-2.9.2/install
+      - name: Restore /nix/store
+        continue-on-error: true
+        if: "steps.nix-cache.outputs.cache-hit == 'true'"
+        run: nix copy --from /tmp/nix-store --no-check-sigs
       - name: Render
         run: nix run .#ci
       - name: Package
         uses: softprops/action-gh-release@v1
         with:
           files: minibase.zip
+      - name: Garbage collection
+        continue-on-error: true
+        run: nix-collect-garbage --delete-older-than 7d
+      - name: Cache /nix/store
+        continue-on-error: true
+        run: nix-copy --to /tmp/nix-store /run/current-system --no-check-sigs
